@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Apply – {{ job.title }}{% endblock %}
+{% block content %}
+<div class="page-content" style="max-width:580px;margin:0 auto;">
+  <a href="/jobs/{{ job.id }}/" style="display:inline-flex;align-items:center;gap:6px;color:#8A7060;font-size:14px;margin-bottom:20px;">← Back to Job</a>
+  <div style="background:linear-gradient(135deg,#3D2B1F,#5C3D28);border-radius:16px;padding:24px;color:white;margin-bottom:24px;">
+    <div class="badge badge-{{ job.status }}" style="margin-bottom:10px;">{{ job.get_status_display }}</div>
+    <h2 style="font-size:20px;font-weight:800;margin-bottom:6px;">{{ job.title }}</h2>
+    <div style="color:#C4A882;font-size:13px;">📍 {{ job.village }}, {{ job.district }} &nbsp;·&nbsp; Rs. {{ job.daily_wage }}/day &nbsp;·&nbsp; {{ job.duration }}</div>
+  </div>
+  <div class="card">
+    <h2 style="font-size:18px;font-weight:800;margin-bottom:4px;">🙋 Your Application</h2>
+    <p style="color:#8A7060;font-size:13px;margin-bottom:20px;">Introduce yourself and explain why you're a good fit</p>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Message to Employer (optional)</label>
+        <textarea name="message" class="form-input" rows="5" placeholder="Namaste! I have X years of experience in this work. I am available from [date]. I can bring [tools/helpers]. Please consider my application..."></textarea>
+      </div>
+      <div style="background:#FFF0E8;border-radius:10px;padding:14px;margin-bottom:20px;font-size:13px;color:#5A3020;">
+        ℹ️ By applying, the employer will be able to see your profile and contact you via messages.
+      </div>
+      <div style="display:flex;gap:12px;">
+        <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center;padding:13px;font-size:15px;">Send Application 🙏</button>
+        <a href="/jobs/{{ job.id }}/" class="btn btn-outline" style="padding:13px 20px;">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

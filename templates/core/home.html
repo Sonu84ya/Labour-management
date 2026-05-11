@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block title %}Home – GaonKaam{% endblock %}
+{% block nav_home %}active{% endblock %}
+{% block content %}
+
+<!-- Hero -->
+<div class="hero">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+    <div>
+      <p style="color:#C4A882;font-size:13px;margin-bottom:4px;">🙏 Namaste,</p>
+      <h1 class="hero-title">{{ user.get_full_name|default:user.username }} <span style="color:#E8A020;">Ji</span></h1>
+      <p style="color:#C4A882;font-size:14px;">📍 {{ user.village }}{% if user.village %}, {% endif %}{{ user.get_district_display }}</p>
+    </div>
+    <a href="/jobs/post/" class="btn btn-gold" style="font-size:15px;padding:13px 24px;">+ Post a Job</a>
+  </div>
+  <div class="hero-stats" style="margin-top:28px;">
+    <div class="hero-stat">
+      <div class="hero-stat-val">{{ total_jobs }}</div>
+      <div class="hero-stat-label">Active Jobs</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-val">{{ total_workers }}</div>
+      <div class="hero-stat-label">Workers Available</div>
+    </div>
+    {% if stats %}
+    <div class="hero-stat">
+      <div class="hero-stat-val">{{ stats.jobs_completed }}</div>
+      <div class="hero-stat-label">Your Jobs Done</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-val">Rs.{{ stats.total_earned|floatformat:0 }}</div>
+      <div class="hero-stat-label">Total Earned</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="page-content">
+  <!-- Quick Actions -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:32px;">
+    <a href="/jobs/" style="background:#FFF0E8;border:1.5px solid #F5C4A8;border-radius:14px;padding:18px;text-align:center;display:block;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+      <div style="font-size:32px;margin-bottom:6px;">💼</div>
+      <div style="font-weight:700;font-size:14px;">Browse Jobs</div>
+    </a>
+    <a href="/jobs/post/" style="background:#E8F5EE;border:1.5px solid #A8D5B5;border-radius:14px;padding:18px;text-align:center;display:block;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+      <div style="font-size:32px;margin-bottom:6px;">📋</div>
+      <div style="font-weight:700;font-size:14px;">Post a Job</div>
+    </a>
+    <a href="/messages/" style="background:#E8F0F8;border:1.5px solid #A8CDE0;border-radius:14px;padding:18px;text-align:center;display:block;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+      <div style="font-size:32px;margin-bottom:6px;">💬</div>
+      <div style="font-weight:700;font-size:14px;">Messages</div>
+    </a>
+    <a href="/payments/" style="background:#FEF3E0;border:1.5px solid #F5D8A0;border-radius:14px;padding:18px;text-align:center;display:block;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+      <div style="font-size:32px;margin-bottom:6px;">💰</div>
+      <div style="font-weight:700;font-size:14px;">Payments</div>
+    </a>
+    <a href="/jobs/my-jobs/" style="background:#F5E8F8;border:1.5px solid #D5A8E0;border-radius:14px;padding:18px;text-align:center;display:block;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+      <div style="font-size:32px;margin-bottom:6px;">📁</div>
+      <div style="font-weight:700;font-size:14px;">My Jobs</div>
+    </a>
+    <a href="/accounts/profile/edit/" style="background:#F8EEE8;border:1.5px solid #E0C4A8;border-radius:14px;padding:18px;text-align:center;display:block;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+      <div style="font-size:32px;margin-bottom:6px;">👤</div>
+      <div style="font-weight:700;font-size:14px;">Edit Profile</div>
+    </a>
+  </div>
+
+  <!-- Urgent Jobs -->
+  {% if urgent_jobs %}
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">🔥 Urgent Jobs</h2>
+      <p class="section-sub">These need workers immediately</p>
+    </div>
+    <a href="/jobs/?status=urgent" style="color:#C1440E;font-weight:600;font-size:14px;">See all →</a>
+  </div>
+  <div class="jobs-grid" style="margin-bottom:36px;">
+    {% for job in urgent_jobs %}
+    <a href="/jobs/{{ job.id }}/" class="job-card urgent" style="display:block;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div class="job-title">{{ job.title }}</div>
+        <span class="badge badge-urgent">🔥 Urgent</span>
+      </div>
+      <div class="job-meta">📍 {{ job.village }}, {{ job.district }} &nbsp;·&nbsp; ⏰ {{ job.duration }}</div>
+      <div class="tags" style="margin-bottom:12px;">
+        <span class="tag">{{ job.get_work_type_display }}</span>
+        <span class="tag">👥 {{ job.workers_needed }} workers</span>
+        {% if job.meals_provided %}<span class="tag">🍚 Meals</span>{% endif %}
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div class="job-pay">Rs. {{ job.daily_wage }}<small>/day</small></div>
+          <div style="font-size:12px;color:#8A7060;margin-top:2px;">{{ job.workers_filled }}/{{ job.workers_needed }} filled</div>
+        </div>
+        <div style="background:#C1440E;color:white;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;">Contact →</div>
+      </div>
+      <div class="progress-bar" style="margin-top:10px;">
+        <div class="progress-fill" style="width:{{ job.fill_percentage_css }};background:linear-gradient(90deg,#C1440E,#E8A020);"></div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Recent Open Jobs -->
+  {% if recent_jobs %}
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">✅ Open Jobs</h2>
+      <p class="section-sub">Latest available work near you</p>
+    </div>
+    <a href="/jobs/" style="color:#C1440E;font-weight:600;font-size:14px;">See all →</a>
+  </div>
+  <div class="jobs-grid">
+    {% for job in recent_jobs %}
+    <a href="/jobs/{{ job.id }}/" class="job-card open" style="display:block;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div class="job-title">{{ job.title }}</div>
+        <span class="badge badge-open">✅ Open</span>
+      </div>
+      <div class="job-meta">📍 {{ job.village }}, {{ job.district }}</div>
+      <div class="tags" style="margin-bottom:12px;">
+        <span class="tag">{{ job.get_work_type_display }}</span>
+        <span class="tag">⏰ {{ job.duration }}</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="job-pay">Rs. {{ job.daily_wage }}<small>/day</small></div>
+        <div style="background:#4A7C59;color:white;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;">Apply →</div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if not urgent_jobs and not recent_jobs %}
+  <div class="empty-state">
+    <div class="empty-icon">💼</div>
+    <div class="empty-title">No jobs posted yet</div>
+    <p style="margin-bottom:20px;">Be the first to post a job in your area!</p>
+    <a href="/jobs/post/" class="btn btn-primary">+ Post First Job</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

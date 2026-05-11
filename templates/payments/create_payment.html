@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Record Payment – GaonKaam{% endblock %}
+{% block nav_pay %}active{% endblock %}
+{% block content %}
+<div class="page-content" style="max-width:600px;margin:0 auto;">
+  <a href="/payments/" style="display:inline-flex;align-items:center;gap:6px;color:#8A7060;font-size:14px;margin-bottom:20px;">← Back to Payments</a>
+  <div style="margin-bottom:24px;">
+    <h1 class="section-title">💰 Record Worker Payment</h1>
+    <p class="section-sub">Create a payment record for a worker you hired</p>
+  </div>
+  <div class="card">
+    {% if accepted_apps %}
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Select Job & Worker *</label>
+        <select name="job" id="jobSelect" class="form-input" onchange="updateWorker(this)" required>
+          <option value="">– Select a job application –</option>
+          {% for app in accepted_apps %}
+          <option value="{{ app.job.id }}" data-worker="{{ app.applicant.id }}" data-wage="{{ app.job.daily_wage }}" data-title="{{ app.job.title }}">
+            {{ app.job.title }} → {{ app.applicant.get_full_name|default:app.applicant.username }} (Rs.{{ app.job.daily_wage }}/day)
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <input type="hidden" name="worker" id="workerInput">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Days Worked *</label>
+          <input name="days_worked" id="daysInput" type="number" min="1" class="form-input" placeholder="e.g. 3" oninput="calcTotal()" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Method</label>
+          <select name="payment_method" class="form-input">
+            <option value="cash">💵 Cash</option>
+            <option value="esewa">📱 eSewa</option>
+            <option value="khalti">💜 Khalti</option>
+            <option value="bank">🏦 Bank Transfer</option>
+          </select>
+        </div>
+      </div>
+      <div id="totalBox" style="display:none;background:linear-gradient(135deg,#3D2B1F,#5C3D28);border-radius:12px;padding:16px;color:white;margin-bottom:16px;text-align:center;">
+        <div style="font-size:13px;color:#C4A882;">Total Amount to Pay</div>
+        <div style="font-size:32px;font-weight:800;color:#E8A020;" id="totalAmt">Rs. 0</div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;font-size:15px;">Create Payment Record →</button>
+    </form>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">👷</div>
+      <div class="empty-title">No accepted workers yet</div>
+      <p>First accept worker applications on your job posts</p>
+      <a href="/jobs/my-jobs/" class="btn btn-primary" style="margin-top:16px;">View My Jobs</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+<script>
+let wageMap = {};
+document.querySelectorAll('#jobSelect option[data-worker]').forEach(opt => {
+  wageMap[opt.value] = { worker: opt.dataset.worker, wage: parseFloat(opt.dataset.wage) };
+});
+function updateWorker(sel) {
+  const info = wageMap[sel.value];
+  if (info) { document.getElementById('workerInput').value = info.worker; calcTotal(); }
+}
+function calcTotal() {
+  const sel = document.getElementById('jobSelect').value;
+  const days = parseFloat(document.getElementById('daysInput').value) || 0;
+  const info = wageMap[sel];
+  if (info && days > 0) {
+    const total = info.wage * days;
+    document.getElementById('totalAmt').textContent = 'Rs. ' + total.toLocaleString();
+    document.getElementById('totalBox').style.display = 'block';
+  }
+}
+</script>
+{% endblock %}

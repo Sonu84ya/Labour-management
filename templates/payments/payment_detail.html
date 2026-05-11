@@ -1,0 +1,111 @@
+{% load gaon_tags %}
+{% extends 'base.html' %}
+{% block title %}Payment Details – GaonKaam{% endblock %}
+{% block nav_pay %}active{% endblock %}
+{% block content %}
+<div class="page-content" style="max-width:700px;margin:0 auto;">
+  <a href="/payments/" style="display:inline-flex;align-items:center;gap:6px;color:#8A7060;font-size:14px;margin-bottom:20px;">← Back to Payments</a>
+
+  <!-- Summary -->
+  <div style="background:linear-gradient(135deg,#3D2B1F,#5C3D28);border-radius:20px;padding:28px;color:white;margin-bottom:24px;">
+    <div style="font-size:13px;color:#C4A882;margin-bottom:6px;">{{ payment.job.title }}</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-size:32px;font-weight:800;color:#E8A020;">Rs. {{ payment.total_amount|floatformat:0 }}</div>
+        <div style="color:#C4A882;font-size:13px;margin-top:4px;">{{ payment.days_worked }} days × Rs.{{ payment.daily_rate }}/day</div>
+      </div>
+      <span class="badge {% if payment.status == 'paid' %}badge-accepted{% elif payment.status == 'partial' %}badge-pending{% else %}badge-filled{% endif %}" style="font-size:13px;padding:6px 14px;">
+        {% if payment.status == 'paid' %}✅ Fully Paid{% elif payment.status == 'partial' %}⏳ Partial{% else %}⏳ Pending{% endif %}
+      </span>
+    </div>
+    <div class="progress-bar" style="margin-top:16px;height:10px;">
+      <div class="progress-fill" style="width:{{ payment.fill_percentage }}%;"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;color:#C4A882;font-size:12px;margin-top:6px;">
+      <span>Paid: Rs.{{ payment.amount_paid|floatformat:0 }}</span>
+      <span>Remaining: Rs.{{ payment.amount_pending|floatformat:0 }}</span>
+    </div>
+  </div>
+
+  <!-- Parties -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+    <div class="card card-sm">
+      <div style="font-size:12px;color:#8A7060;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Worker</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="profile-avatar" style="width:40px;height:40px;font-size:14px;">{{ payment.worker.get_initials }}</div>
+        <div>
+          <div style="font-weight:700;font-size:14px;">{{ payment.worker.get_full_name|default:payment.worker.username }}</div>
+          <div style="font-size:12px;color:#8A7060;">📍 {{ payment.worker.village }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card card-sm">
+      <div style="font-size:12px;color:#8A7060;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Employer</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="profile-avatar" style="width:40px;height:40px;font-size:14px;">{{ payment.employer.get_initials }}</div>
+        <div>
+          <div style="font-weight:700;font-size:14px;">{{ payment.employer.get_full_name|default:payment.employer.username }}</div>
+          <div style="font-size:12px;color:#8A7060;">📍 {{ payment.employer.village }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Payment (only employer) -->
+  {% if user == payment.employer and payment.status != 'paid' %}
+  <div class="card" style="margin-bottom:24px;border-color:#C1440E;">
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;">💰 Record a Payment</h3>
+    <form method="post" action="/payments/{{ payment.id }}/add/">
+      {% csrf_token %}
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Amount (Rs.) *</label>
+          <input name="amount" type="number" class="form-input" placeholder="e.g. 2400" max="{{ payment.amount_pending }}" required>
+          <small style="font-size:12px;color:#8A7060;">Max: Rs.{{ payment.amount_pending|floatformat:0 }}</small>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Method</label>
+          <select name="method" class="form-input">
+            <option value="cash">💵 Cash</option>
+            <option value="esewa">📱 eSewa</option>
+            <option value="khalti">💜 Khalti</option>
+            <option value="bank">🏦 Bank Transfer</option>
+            <option value="imepay">📲 IME Pay</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Transaction Reference (optional)</label>
+          <input name="reference" class="form-input" placeholder="e.g. eSewa txn ID">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Note</label>
+          <input name="note" class="form-input" placeholder="e.g. Day 1-3 payment">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;">Record Payment ✅</button>
+    </form>
+  </div>
+  {% endif %}
+
+  <!-- Transaction History -->
+  <div class="card">
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;">📋 Transaction History</h3>
+    {% if transactions %}
+    {% for txn in transactions %}
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #EDD9BC;">
+      <div>
+        <div style="font-weight:600;font-size:14px;">Rs. {{ txn.amount|floatformat:0 }} via {{ txn.get_method_display }}</div>
+        <div style="font-size:12px;color:#8A7060;">{{ txn.paid_at|date:"M d, Y g:i A" }}{% if txn.transaction_ref %} · Ref: {{ txn.transaction_ref }}{% endif %}</div>
+        {% if txn.note %}<div style="font-size:12px;color:#5A4030;font-style:italic;">{{ txn.note }}</div>{% endif %}
+      </div>
+      <span class="badge badge-accepted">✅ Paid</span>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div style="text-align:center;padding:24px;color:#8A7060;font-size:14px;">No payments recorded yet</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

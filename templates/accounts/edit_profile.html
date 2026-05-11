@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile – GaonKaam{% endblock %}
+{% block nav_profile %}active{% endblock %}
+{% block content %}
+<div class="page-content" style="max-width:700px;margin:0 auto;">
+  <div style="margin-bottom:24px;">
+    <h1 class="section-title">✏️ Edit Profile</h1>
+    <p class="section-sub">Update your information so employers and workers can find you</p>
+  </div>
+  <div class="card">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">First Name</label>
+          {{ form.first_name }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name</label>
+          {{ form.last_name }}
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          {{ form.phone }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          {{ form.role }}
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">District</label>
+          {{ form.district }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Village</label>
+          {{ form.village }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bio / About You</label>
+        {{ form.bio }}
+      </div>
+      <div class="form-group">
+        <label class="form-label">Profile Photo</label>
+        {{ form.profile_photo }}
+      </div>
+      <div class="divider"></div>
+      <div class="form-group">
+        <label class="form-label">🛠️ Your Skills (select all that apply)</label>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:8px;">
+          {% for value, label in all_skills %}
+          <label style="display:flex;align-items:center;gap:8px;background:#FFF0E8;border:1.5px solid {% if value in user_skills %}#C1440E{% else %}#EDD9BC{% endif %};border-radius:10px;padding:10px 12px;cursor:pointer;font-size:13px;font-weight:500;">
+            <input type="checkbox" name="skills" value="{{ value }}" {% if value in user_skills %}checked{% endif %} style="accent-color:#C1440E;">
+            {{ label }}
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:8px;">
+        <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center;padding:13px;">Save Changes ✅</button>
+        <a href="/accounts/profile/" class="btn btn-outline" style="padding:13px 20px;">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

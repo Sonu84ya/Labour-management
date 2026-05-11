@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}My Jobs – GaonKaam{% endblock %}
+{% block nav_jobs %}active{% endblock %}
+{% block content %}
+<div class="page-content" style="max-width:1000px;margin:0 auto;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+    <div>
+      <h1 class="section-title">📁 My Jobs</h1>
+      <p class="section-sub">Jobs you posted and jobs you applied for</p>
+    </div>
+    <a href="/jobs/post/" class="btn btn-primary">+ Post New Job</a>
+  </div>
+
+  <!-- Posted Jobs -->
+  <div style="margin-bottom:36px;">
+    <h2 style="font-size:18px;font-weight:700;margin-bottom:16px;">💼 Jobs I Posted ({{ posted_jobs.count }})</h2>
+    {% if posted_jobs %}
+    <div class="jobs-grid">
+      {% for job in posted_jobs %}
+      <div class="job-card {{ job.status }}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <a href="/jobs/{{ job.id }}/" class="job-title" style="color:#3D2B1F;">{{ job.title }}</a>
+          <span class="badge badge-{{ job.status }}">{{ job.get_status_display }}</span>
+        </div>
+        <div class="job-meta">📍 {{ job.village }}, {{ job.district }} &nbsp;·&nbsp; ⏰ {{ job.duration }}</div>
+        <div class="tags" style="margin-bottom:12px;">
+          <span class="tag">{{ job.get_work_type_display }}</span>
+          <span class="tag">👥 {{ job.applications.count }} applicants</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="job-pay">Rs. {{ job.daily_wage }}<small>/day</small></div>
+          <div style="display:flex;gap:6px;">
+            <a href="/jobs/{{ job.id }}/" class="btn btn-outline btn-sm">View</a>
+            <a href="/jobs/{{ job.id }}/edit/" class="btn btn-primary btn-sm">Edit</a>
+          </div>
+        </div>
+        <div class="progress-bar" style="margin-top:10px;">
+          <div class="progress-fill" style="width:{{ job.fill_percentage }}%;"></div>
+        </div>
+        <div style="font-size:12px;color:#8A7060;margin-top:4px;">{{ job.workers_filled }}/{{ job.workers_needed }} workers hired</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <div class="empty-title">No jobs posted yet</div>
+      <p style="margin-bottom:16px;">Post your first job to start hiring workers</p>
+      <a href="/jobs/post/" class="btn btn-primary">+ Post a Job</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Applied Jobs -->
+  <div>
+    <h2 style="font-size:18px;font-weight:700;margin-bottom:16px;">🙋 Jobs I Applied For ({{ applied_jobs.count }})</h2>
+    {% if applied_jobs %}
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      {% for app in applied_jobs %}
+      <div class="card card-sm" style="display:flex;align-items:center;gap:16px;">
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+            <a href="/jobs/{{ app.job.id }}/" style="font-weight:700;font-size:15px;color:#3D2B1F;">{{ app.job.title }}</a>
+            <span class="badge badge-{{ app.status }}">{{ app.get_status_display }}</span>
+          </div>
+          <div style="font-size:13px;color:#8A7060;">📍 {{ app.job.village }}, {{ app.job.district }} &nbsp;·&nbsp; Rs. {{ app.job.daily_wage }}/day &nbsp;·&nbsp; Applied {{ app.applied_at|date:"M d, Y" }}</div>
+          {% if app.message %}<div style="font-size:13px;color:#5A4030;margin-top:4px;font-style:italic;">"{{ app.message|truncatechars:80 }}"</div>{% endif %}
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0;">
+          <a href="/jobs/{{ app.job.id }}/" class="btn btn-outline btn-sm">View Job</a>
+          {% if app.status == 'accepted' %}
+          <a href="/messages/start/{{ app.job.posted_by.id }}/?job_id={{ app.job.id }}" class="btn btn-primary btn-sm">💬 Message</a>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <div class="empty-title">No applications yet</div>
+      <p style="margin-bottom:16px;">Browse jobs and apply to get started</p>
+      <a href="/jobs/" class="btn btn-primary">Browse Jobs</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

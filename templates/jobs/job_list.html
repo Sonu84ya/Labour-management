@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}Browse Jobs – GaonKaam{% endblock %}
+{% block nav_jobs %}active{% endblock %}
+{% block content %}
+<div style="display:flex;min-height:calc(100vh - 64px);">
+
+  <!-- Sidebar Filters -->
+  <aside style="width:260px;background:#FFF8EE;border-right:1px solid #EDD9BC;padding:24px;flex-shrink:0;overflow-y:auto;">
+    <h3 style="font-size:12px;font-weight:700;color:#8A7060;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;">Filter Jobs</h3>
+    <form method="get" id="filterForm">
+      <div class="form-group">
+        <label class="form-label">🔍 Search</label>
+        <input name="q" class="form-input" placeholder="Job, village, skill..." value="{{ filters.q }}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Work Type</label>
+        <select name="work_type" class="form-input" onchange="document.getElementById('filterForm').submit()">
+          <option value="">All Types</option>
+          {% for val, label in work_types %}
+          <option value="{{ val }}" {% if filters.work_type == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select name="status" class="form-input" onchange="document.getElementById('filterForm').submit()">
+          <option value="">All Status</option>
+          <option value="urgent" {% if filters.status == 'urgent' %}selected{% endif %}>🔥 Urgent</option>
+          <option value="open" {% if filters.status == 'open' %}selected{% endif %}>✅ Open</option>
+          <option value="filled" {% if filters.status == 'filled' %}selected{% endif %}>Filled</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">District</label>
+        <input name="district" class="form-input" placeholder="e.g. Sindhupalchok" value="{{ filters.district }}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Min Wage (Rs.)</label>
+        <input name="min_wage" type="number" class="form-input" placeholder="500">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Max Wage (Rs.)</label>
+        <input name="max_wage" type="number" class="form-input" placeholder="2000">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Apply Filters</button>
+      <a href="/jobs/" class="btn btn-outline" style="width:100%;justify-content:center;margin-top:8px;">Clear All</a>
+    </form>
+
+    <div class="divider"></div>
+    <h3 style="font-size:12px;font-weight:700;color:#8A7060;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;">Quick Filter</h3>
+    {% for val, label in work_types %}
+    <a href="/jobs/?work_type={{ val }}" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:13px;font-weight:500;color:#3D2B1F;margin-bottom:2px;transition:background 0.15s;" onmouseover="this.style.background='rgba(193,68,14,0.08)'" onmouseout="this.style.background=''">
+      {{ label }}
+    </a>
+    {% endfor %}
+  </aside>
+
+  <!-- Main Content -->
+  <main style="flex:1;padding:28px 32px;overflow-y:auto;">
+    <div class="section-header">
+      <div>
+        <h1 class="section-title">💼 Available Jobs</h1>
+        <p class="section-sub">{{ total_count }} job{{ total_count|pluralize }} found</p>
+      </div>
+      <a href="/jobs/post/" class="btn btn-primary">+ Post Job</a>
+    </div>
+
+    {% if jobs %}
+    <div class="jobs-grid">
+      {% for job in jobs %}
+      <a href="/jobs/{{ job.id }}/" class="job-card {{ job.status }}" style="display:block;animation:fadeIn 0.3s ease both;animation-delay:{{ forloop.counter0 }}0ms;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <div class="job-title">{{ job.title }}</div>
+          <span class="badge badge-{{ job.status }}">{{ job.get_status_display }}</span>
+        </div>
+        <div class="job-meta">📍 {{ job.village }}, {{ job.district }}&nbsp;·&nbsp;⏰ {{ job.duration }}</div>
+        <div class="tags" style="margin-bottom:12px;">
+          <span class="tag">{{ job.get_work_type_display }}</span>
+          <span class="tag">👥 {{ job.workers_needed }} needed</span>
+          {% if job.meals_provided %}<span class="tag">🍚 Meals</span>{% endif %}
+          {% if job.transport_provided %}<span class="tag">🚗 Transport</span>{% endif %}
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div class="job-pay">Rs. {{ job.daily_wage }}<small>/day</small></div>
+            <div style="font-size:12px;color:#8A7060;margin-top:2px;">{{ job.workers_filled }}/{{ job.workers_needed }} filled · Posted by {{ job.posted_by.get_full_name|default:job.posted_by.username }}</div>
+          </div>
+          <div style="background:#C1440E;color:white;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;">View →</div>
+        </div>
+        <div class="progress-bar" style="margin-top:10px;">
+          <div class="progress-fill" style="width:{{ job.fill_percentage }}%;"></div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <div class="empty-title">No jobs found</div>
+      <p style="margin-bottom:20px;">Try changing your filters or post a new job</p>
+      <a href="/jobs/post/" class="btn btn-primary">+ Post a Job</a>
+    </div>
+    {% endif %}
+  </main>
+</div>
+
+<style>
+@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+</style>
+{% endblock %}

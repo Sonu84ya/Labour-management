@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}{% if editing %}Edit Job{% else %}Post a Job{% endif %} – GaonKaam{% endblock %}
+{% block nav_jobs %}active{% endblock %}
+{% block content %}
+<div class="page-content" style="max-width:700px;margin:0 auto;">
+  <div style="margin-bottom:24px;">
+    <h1 class="section-title">{% if editing %}✏️ Edit Job{% else %}📋 Post a New Job{% endif %}</h1>
+    <p class="section-sub">Fill in the details so workers can find and apply for this opportunity</p>
+  </div>
+  <div class="card">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Job Title *</label>
+        {% if editing %}{{ form.title }}{% else %}<input name="title" class="form-input" placeholder="e.g. Wheat Harvest Help Needed" required>{% endif %}
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Work Type *</label>
+          {{ form.work_type }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          {{ form.status }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Job Description *</label>
+        {{ form.description }}
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Village *</label>
+          {{ form.village }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">District *</label>
+          {{ form.district }}
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Daily Wage (Rs.) *</label>
+          {{ form.daily_wage }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Workers Needed *</label>
+          {{ form.workers_needed }}
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Duration *</label>
+          {{ form.duration }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Start Date</label>
+          {{ form.start_date }}
+        </div>
+      </div>
+      <div class="divider"></div>
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:14px;">🎁 Additional Benefits</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+        <label style="display:flex;align-items:center;gap:8px;background:#E8F5EE;border:1.5px solid #A8D5B5;border-radius:10px;padding:12px;cursor:pointer;font-size:13px;font-weight:500;">
+          <input type="checkbox" name="meals_provided" {% if form.meals_provided.value %}checked{% endif %} style="accent-color:#4A7C59;width:16px;height:16px;">
+          🍚 Meals Provided
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;background:#E8F0F8;border:1.5px solid #A8CDE0;border-radius:10px;padding:12px;cursor:pointer;font-size:13px;font-weight:500;">
+          <input type="checkbox" name="transport_provided" {% if form.transport_provided.value %}checked{% endif %} style="accent-color:#4A90B8;width:16px;height:16px;">
+          🚗 Transport
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;background:#FFF0E8;border:1.5px solid #F5C4A8;border-radius:10px;padding:12px;cursor:pointer;font-size:13px;font-weight:500;">
+          <input type="checkbox" name="tools_required" {% if form.tools_required.value %}checked{% endif %} style="accent-color:#C1440E;width:16px;height:16px;">
+          ⚒️ Tools Required
+        </label>
+      </div>
+      {% if form.errors %}
+      <div class="alert alert-error" style="margin-top:16px;">
+        {% for field, errors in form.errors.items %}{% for e in errors %}<div>{{ field }}: {{ e }}</div>{% endfor %}{% endfor %}
+      </div>
+      {% endif %}
+      <div style="display:flex;gap:12px;margin-top:24px;">
+        <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center;padding:13px;font-size:15px;">
+          {% if editing %}Update Job ✅{% else %}Post Job →{% endif %}
+        </button>
+        <a href="/jobs/" class="btn btn-outline" style="padding:13px 20px;">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

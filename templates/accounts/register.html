@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Register – GaonKaam{% endblock %}
+{% block content %}
+<div style="min-height:100vh;background:linear-gradient(135deg,#3D2B1F,#5C3D28);display:flex;align-items:center;justify-content:center;padding:24px;">
+  <div style="width:100%;max-width:500px;">
+    <div style="text-align:center;margin-bottom:28px;">
+      <h1 style="font-size:26px;font-weight:800;color:#F5E6C8;"><span style="color:#E8A020;">Gaon</span>Kaam</h1>
+      <p style="color:#C4A882;font-size:13px;">Join Nepal's Village Labour Network</p>
+    </div>
+    <div style="background:#FFF8EE;border-radius:20px;padding:32px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <h2 style="font-size:20px;font-weight:800;margin-bottom:4px;">Create Account 🙌</h2>
+      <p style="color:#8A7060;font-size:13px;margin-bottom:24px;">Start finding work or hiring workers in your area</p>
+      {% if messages %}{% for m in messages %}<div class="alert alert-error">{{ m }}</div>{% endfor %}{% endif %}
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input name="first_name" class="form-input" placeholder="Ram" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input name="last_name" class="form-input" placeholder="Shrestha" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input name="username" class="form-input" placeholder="ram_shrestha" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input name="phone" class="form-input" placeholder="98XXXXXXXX" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">District</label>
+            <select name="district" class="form-input">
+              <option value="sindhupalchok">Sindhupalchok</option>
+              <option value="nuwakot">Nuwakot</option>
+              <option value="kavrepalanchok">Kavrepalanchok</option>
+              <option value="makwanpur">Makwanpur</option>
+              <option value="dhading">Dhading</option>
+              <option value="rasuwa">Rasuwa</option>
+              <option value="lalitpur">Lalitpur</option>
+              <option value="kathmandu">Kathmandu</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Village</label>
+            <input name="village" class="form-input" placeholder="e.g. Bhumidanda">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">I am a…</label>
+          <select name="role" class="form-input">
+            <option value="worker">🧑‍🌾 Worker – I want to find jobs</option>
+            <option value="employer">🏠 Employer – I want to hire workers</option>
+            <option value="both">🔄 Both – Find and post jobs</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input name="password1" type="password" class="form-input" placeholder="Create password" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm Password</label>
+            <input name="password2" type="password" class="form-input" placeholder="Repeat password" required>
+          </div>
+        </div>
+        {% if form.errors %}
+        <div class="alert alert-error">
+          {% for field, errors in form.errors.items %}{% for e in errors %}{{ e }} {% endfor %}{% endfor %}
+        </div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;font-size:15px;">Create Account →</button>
+      </form>
+      <div style="text-align:center;margin-top:20px;font-size:14px;color:#8A7060;">
+        Already have an account? <a href="/accounts/login/" style="color:#C1440E;font-weight:600;">Sign in</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

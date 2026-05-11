@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Login – GaonKaam{% endblock %}
+{% block content %}
+<div style="min-height:100vh;background:linear-gradient(135deg,#3D2B1F,#5C3D28);display:flex;align-items:center;justify-content:center;padding:24px;">
+  <div style="width:100%;max-width:420px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="font-size:48px;margin-bottom:8px;">🌾</div>
+      <h1 style="font-size:28px;font-weight:800;color:#F5E6C8;letter-spacing:-0.5px;"><span style="color:#E8A020;">Gaon</span>Kaam</h1>
+      <p style="color:#C4A882;font-size:14px;margin-top:6px;">Village Labour Connect – Nepal</p>
+    </div>
+    <div style="background:#FFF8EE;border-radius:20px;padding:32px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <h2 style="font-size:20px;font-weight:800;margin-bottom:4px;">Welcome Back 🙏</h2>
+      <p style="color:#8A7060;font-size:13px;margin-bottom:24px;">Sign in to find or post work in your village</p>
+      {% if messages %}{% for m in messages %}<div class="alert alert-error">{{ m }}</div>{% endfor %}{% endif %}
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input name="username" class="form-input" placeholder="Enter your username" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input name="password" type="password" class="form-input" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;font-size:15px;margin-top:4px;">Sign In →</button>
+      </form>
+      <div style="text-align:center;margin-top:20px;font-size:14px;color:#8A7060;">
+        Don't have an account? <a href="/accounts/register/" style="color:#C1440E;font-weight:600;">Register here</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

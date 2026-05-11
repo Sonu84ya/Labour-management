@@ -1,0 +1,137 @@
+{% load gaon_tags %}
+{% extends 'base.html' %}
+{% block title %}{{ job.title }} – GaonKaam{% endblock %}
+{% block nav_jobs %}active{% endblock %}
+{% block content %}
+<div class="page-content" style="max-width:900px;margin:0 auto;">
+  <a href="/jobs/" style="display:inline-flex;align-items:center;gap:6px;color:#8A7060;font-size:14px;margin-bottom:20px;">← Back to Jobs</a>
+
+  <div style="display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start;">
+    <!-- Main -->
+    <div>
+      <div style="background:linear-gradient(135deg,#3D2B1F,#5C3D28);border-radius:20px;padding:28px;color:white;margin-bottom:20px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(232,160,32,0.1);"></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;position:relative;">
+          <span class="badge badge-{{ job.status }}" style="font-size:12px;">{{ job.get_status_display }}</span>
+          <span style="color:#C4A882;font-size:13px;">{{ job.created_at|date:"M d, Y" }}</span>
+        </div>
+        <h1 style="font-size:26px;font-weight:800;margin-bottom:8px;position:relative;">{{ job.title }}</h1>
+        <div style="color:#C4A882;font-size:14px;position:relative;">📍 {{ job.village }}, {{ job.district }}</div>
+        <div style="margin-top:16px;display:flex;gap:20px;flex-wrap:wrap;position:relative;">
+          <div><div style="font-size:28px;font-weight:800;color:#E8A020;">Rs. {{ job.daily_wage }}</div><div style="color:#C4A882;font-size:12px;">per day</div></div>
+          <div style="width:1px;background:rgba(255,255,255,0.2);"></div>
+          <div><div style="font-size:22px;font-weight:800;color:#E8A020;">{{ job.workers_needed }}</div><div style="color:#C4A882;font-size:12px;">workers needed</div></div>
+          <div style="width:1px;background:rgba(255,255,255,0.2);"></div>
+          <div><div style="font-size:22px;font-weight:800;color:#E8A020;">{{ job.duration }}</div><div style="color:#C4A882;font-size:12px;">duration</div></div>
+        </div>
+      </div>
+
+      <!-- Details -->
+      <div class="card" style="margin-bottom:20px;">
+        <h2 style="font-size:16px;font-weight:700;margin-bottom:14px;">📋 Job Details</h2>
+        <p style="font-size:14px;line-height:1.7;color:#3D2B1F;margin-bottom:16px;">{{ job.description }}</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div style="background:#FFF0E8;border-radius:10px;padding:12px;">
+            <div style="font-size:12px;color:#8A7060;margin-bottom:2px;">Work Type</div>
+            <div style="font-weight:600;font-size:14px;">{{ job.get_work_type_display }}</div>
+          </div>
+          <div style="background:#FFF0E8;border-radius:10px;padding:12px;">
+            <div style="font-size:12px;color:#8A7060;margin-bottom:2px;">Start Date</div>
+            <div style="font-weight:600;font-size:14px;">{{ job.start_date|date:"M d, Y"|default:"Flexible" }}</div>
+          </div>
+          <div style="background:{% if job.meals_provided %}#E8F5EE{% else %}#F5F0EC{% endif %};border-radius:10px;padding:12px;">
+            <div style="font-size:12px;color:#8A7060;margin-bottom:2px;">Meals Provided</div>
+            <div style="font-weight:600;font-size:14px;">{% if job.meals_provided %}✅ Yes{% else %}❌ No{% endif %}</div>
+          </div>
+          <div style="background:{% if job.transport_provided %}#E8F5EE{% else %}#F5F0EC{% endif %};border-radius:10px;padding:12px;">
+            <div style="font-size:12px;color:#8A7060;margin-bottom:2px;">Transport</div>
+            <div style="font-weight:600;font-size:14px;">{% if job.transport_provided %}✅ Provided{% else %}❌ Own arrangement{% endif %}</div>
+          </div>
+          <div style="background:#F5F0EC;border-radius:10px;padding:12px;">
+            <div style="font-size:12px;color:#8A7060;margin-bottom:2px;">Tools Required</div>
+            <div style="font-weight:600;font-size:14px;">{% if job.tools_required %}⚒️ Bring your own{% else %}✅ Provided{% endif %}</div>
+          </div>
+          <div style="background:#FFF0E8;border-radius:10px;padding:12px;">
+            <div style="font-size:12px;color:#8A7060;margin-bottom:2px;">Spots Remaining</div>
+            <div style="font-weight:600;font-size:14px;">{{ job.spots_remaining }} of {{ job.workers_needed }}</div>
+          </div>
+        </div>
+        <div style="margin-top:14px;">
+          <div class="progress-bar"><div class="progress-fill" style="width:{{ job.fill_percentage }}%;"></div></div>
+          <div style="font-size:12px;color:#8A7060;margin-top:4px;">{{ job.workers_filled }} of {{ job.workers_needed }} workers hired</div>
+        </div>
+      </div>
+
+      <!-- Applications (for job poster) -->
+      {% if user == job.posted_by and applications %}
+      <div class="card" style="margin-bottom:20px;">
+        <h2 style="font-size:16px;font-weight:700;margin-bottom:16px;">📥 Applications ({{ applications.count }})</h2>
+        {% for app in applications %}
+        <div style="border:1.5px solid #EDD9BC;border-radius:12px;padding:16px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+            <div class="profile-avatar" style="width:40px;height:40px;font-size:14px;">{{ app.applicant.get_initials }}</div>
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:14px;">
+                <a href="/accounts/profile/{{ app.applicant.id }}/" style="color:#3D2B1F;">{{ app.applicant.get_full_name|default:app.applicant.username }}</a>
+              </div>
+              <div style="font-size:12px;color:#8A7060;">📍 {{ app.applicant.village }}, {{ app.applicant.get_district_display }} · Applied {{ app.applied_at|date:"M d" }}</div>
+            </div>
+            <span class="badge badge-{{ app.status }}">{{ app.get_status_display }}</span>
+          </div>
+          {% if app.message %}<p style="font-size:13px;color:#5A4030;background:#FFF8EE;border-radius:8px;padding:10px;margin-bottom:10px;">{{ app.message }}</p>{% endif %}
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a href="/messages/start/{{ app.applicant.id }}/?job_id={{ job.id }}" class="btn btn-outline btn-sm">💬 Message</a>
+            {% if app.status == 'pending' %}
+            <a href="/jobs/application/{{ app.id }}/accept/" class="btn btn-success btn-sm">✅ Accept</a>
+            <a href="/jobs/application/{{ app.id }}/reject/" class="btn btn-danger btn-sm">❌ Reject</a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+      <!-- Poster Info -->
+      <div class="card" style="margin-bottom:16px;">
+        <h3 style="font-size:14px;font-weight:700;color:#8A7060;margin-bottom:14px;">Posted By</h3>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+          <div class="profile-avatar" style="width:48px;height:48px;font-size:16px;">{{ job.posted_by.get_initials }}</div>
+          <div>
+            <div style="font-weight:700;font-size:15px;">{{ job.posted_by.get_full_name|default:job.posted_by.username }}</div>
+            <div style="font-size:12px;color:#8A7060;">📍 {{ job.posted_by.village }}{% if job.posted_by.village %},{% endif %} {{ job.posted_by.get_district_display }}</div>
+            {% if job.posted_by.rating > 0 %}<div style="color:#E8A020;font-size:13px;">★ {{ job.posted_by.rating }}</div>{% endif %}
+          </div>
+        </div>
+        {% if user != job.posted_by %}
+        <a href="/messages/start/{{ job.posted_by.id }}/?job_id={{ job.id }}" class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:8px;">💬 Contact Employer</a>
+        {% endif %}
+        <a href="/accounts/profile/{{ job.posted_by.id }}/" class="btn btn-outline" style="width:100%;justify-content:center;">View Profile</a>
+      </div>
+
+      <!-- Apply -->
+      {% if user.is_authenticated and can_apply %}
+      <div class="card" style="margin-bottom:16px;border-color:#C1440E;">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:6px;">🙋 Apply for this Job</h3>
+        <p style="font-size:13px;color:#8A7060;margin-bottom:14px;">Send your application to the employer</p>
+        <a href="/jobs/{{ job.id }}/apply/" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;font-size:15px;">Apply Now →</a>
+      </div>
+      {% elif user_application %}
+      <div class="card" style="margin-bottom:16px;border-color:{% if user_application.status == 'accepted' %}#4A7C59{% elif user_application.status == 'rejected' %}#C1440E{% else %}#E8A020{% endif %};">
+        <div style="font-size:15px;font-weight:700;margin-bottom:6px;">Your Application</div>
+        <span class="badge badge-{{ user_application.status }}" style="font-size:13px;">{{ user_application.get_status_display }}</span>
+        <p style="font-size:13px;color:#8A7060;margin-top:8px;">Applied on {{ user_application.applied_at|date:"M d, Y" }}</p>
+      </div>
+      {% endif %}
+
+      {% if user == job.posted_by %}
+      <div style="display:flex;gap:8px;flex-direction:column;">
+        <a href="/jobs/{{ job.id }}/edit/" class="btn btn-outline" style="justify-content:center;">✏️ Edit Job</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}Payments – GaonKaam{% endblock %}
+{% block nav_pay %}active{% endblock %}
+{% block content %}
+<div class="page-content" style="max-width:1000px;margin:0 auto;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+    <div>
+      <h1 class="section-title">💰 Payment Tracker</h1>
+      <p class="section-sub">Track wages earned and paid out</p>
+    </div>
+    <a href="/payments/create/" class="btn btn-primary">+ Record Payment</a>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="stat-grid" style="margin-bottom:32px;">
+    <div style="background:linear-gradient(135deg,#4A7C59,#3A6049);border-radius:14px;padding:20px;color:white;text-align:center;">
+      <div style="font-size:26px;font-weight:800;">Rs. {{ total_earned|floatformat:0 }}</div>
+      <div style="font-size:13px;opacity:0.85;margin-top:4px;">✅ Total Received</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#B07D00,#8A6000);border-radius:14px;padding:20px;color:white;text-align:center;">
+      <div style="font-size:26px;font-weight:800;">Rs. {{ total_pending|floatformat:0 }}</div>
+      <div style="font-size:13px;opacity:0.85;margin-top:4px;">⏳ Pending Receipt</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#4A90B8,#3A7098);border-radius:14px;padding:20px;color:white;text-align:center;">
+      <div style="font-size:26px;font-weight:800;">Rs. {{ total_paid_out|floatformat:0 }}</div>
+      <div style="font-size:13px;opacity:0.85;margin-top:4px;">💸 Total Paid Out</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#C1440E,#A33A0C);border-radius:14px;padding:20px;color:white;text-align:center;">
+      <div style="font-size:26px;font-weight:800;">{{ received_payments.count }}</div>
+      <div style="font-size:13px;opacity:0.85;margin-top:4px;">📋 Total Records</div>
+    </div>
+  </div>
+
+  <!-- Money I'm Receiving -->
+  <div style="margin-bottom:32px;">
+    <h2 style="font-size:18px;font-weight:700;margin-bottom:16px;">📥 Wages I'm Receiving ({{ received_payments.count }})</h2>
+    {% if received_payments %}
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      {% for payment in received_payments %}
+      <div class="card card-sm" style="border-left:4px solid {% if payment.status == 'paid' %}#4A7C59{% elif payment.status == 'partial' %}#E8A020{% else %}#8A7060{% endif %};">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div style="font-weight:700;font-size:15px;">
+              <a href="/payments/{{ payment.id }}/" style="color:#3D2B1F;">{{ payment.job.title }}</a>
+            </div>
+            <div style="font-size:13px;color:#8A7060;margin-top:2px;">
+              👤 Employer: {{ payment.employer.get_full_name|default:payment.employer.username }}
+              &nbsp;·&nbsp; 📅 {{ payment.days_worked }} days @ Rs.{{ payment.daily_rate }}/day
+              &nbsp;·&nbsp; {{ payment.created_at|date:"M d, Y" }}
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:20px;font-weight:800;color:#C1440E;">Rs. {{ payment.total_amount|floatformat:0 }}</div>
+            <span class="badge {% if payment.status == 'paid' %}badge-accepted{% elif payment.status == 'partial' %}badge-pending{% else %}badge-filled{% endif %}">
+              {% if payment.status == 'paid' %}✅ Paid{% elif payment.status == 'partial' %}⏳ Partial (Rs.{{ payment.amount_paid|floatformat:0 }} received){% else %}⏳ Pending{% endif %}
+            </span>
+          </div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:{{ payment.fill_percentage }}%;{% if payment.status == 'paid' %}background:linear-gradient(90deg,#4A7C59,#6AAA85);{% elif payment.status == 'partial' %}background:linear-gradient(90deg,#E8A020,#F5C850);{% endif %}"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+          <div style="font-size:12px;color:#8A7060;">Rs. {{ payment.amount_paid|floatformat:0 }} of Rs. {{ payment.total_amount|floatformat:0 }} received</div>
+          <a href="/payments/{{ payment.id }}/" class="btn btn-outline btn-sm">Details →</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding:32px;">
+      <div class="empty-icon">💸</div>
+      <div class="empty-title">No payment records yet</div>
+      <p>When employers record your wages, they'll appear here</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Payments I'm Making -->
+  <div style="margin-bottom:32px;">
+    <h2 style="font-size:18px;font-weight:700;margin-bottom:16px;">📤 Wages I'm Paying Out ({{ paid_out_payments.count }})</h2>
+    {% if paid_out_payments %}
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      {% for payment in paid_out_payments %}
+      <div class="card card-sm" style="border-left:4px solid {% if payment.status == 'paid' %}#4A90B8{% else %}#E8A020{% endif %};">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
+          <div>
+            <div style="font-weight:700;font-size:15px;"><a href="/payments/{{ payment.id }}/" style="color:#3D2B1F;">{{ payment.job.title }}</a></div>
+            <div style="font-size:13px;color:#8A7060;margin-top:2px;">
+              👤 Worker: {{ payment.worker.get_full_name|default:payment.worker.username }}
+              &nbsp;·&nbsp; {{ payment.days_worked }} days × Rs.{{ payment.daily_rate }}
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:20px;font-weight:800;color:#C1440E;">Rs. {{ payment.total_amount|floatformat:0 }}</div>
+            <span class="badge {% if payment.status == 'paid' %}badge-accepted{% else %}badge-pending{% endif %}">
+              {% if payment.status == 'paid' %}✅ Fully Paid{% else %}⏳ Rs.{{ payment.amount_pending|floatformat:0 }} remaining{% endif %}
+            </span>
+          </div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:{{ payment.fill_percentage }}%;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+          <div style="font-size:12px;color:#8A7060;">Paid: Rs.{{ payment.amount_paid|floatformat:0 }} / Rs.{{ payment.total_amount|floatformat:0 }}</div>
+          <div style="display:flex;gap:8px;">
+            {% if payment.status != 'paid' %}<a href="/payments/{{ payment.id }}/" class="btn btn-primary btn-sm">💰 Add Payment</a>{% endif %}
+            <a href="/payments/{{ payment.id }}/" class="btn btn-outline btn-sm">Details</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding:32px;">
+      <div class="empty-icon">📋</div>
+      <div class="empty-title">No payments recorded yet</div>
+      <p>Record wages for workers you've hired</p>
+      <a href="/payments/create/" class="btn btn-primary" style="margin-top:12px;">+ Record Payment</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Digital Payment Banner -->
+  <div style="background:linear-gradient(135deg,#4A7C59,#4A90B8);border-radius:20px;padding:28px;color:white;">
+    <h3 style="font-size:20px;font-weight:800;margin-bottom:8px;">🚀 Digital Payments Coming Soon!</h3>
+    <p style="opacity:0.9;font-size:14px;line-height:1.7;max-width:600px;">Pay workers directly through <strong>eSewa</strong>, <strong>Khalti</strong>, or bank transfer. Workers get paid instantly. Dispute resolution included. No cash needed.</p>
+    <div style="display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;">
+      <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;">📱 eSewa</div>
+      <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;">💜 Khalti</div>
+      <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;">🏦 Bank Transfer</div>
+      <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;">📲 IME Pay</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
